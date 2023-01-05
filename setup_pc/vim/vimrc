@@ -194,9 +194,9 @@ Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
 Plugin 'Valloric/YouCompleteMe', { 'commit':'d98f896' }
 " git submodule update --init --recursive && ./install.py --clangd-completer
 "
-"ldikss/vim-translator'
+Plugin 'voldikss/vim-translator'
 let g:translator_target_lang = "zh"
-let g:translator_proxy_url = 'socks5://192.168.122.17:1080'
+let g:translator_proxy_url = 'socks5://127.0.0.1:1080'
 """ Configuration example
 " Echo translation in the cmdline
  nmap <silent> <Leader>t <Plug>Translate
