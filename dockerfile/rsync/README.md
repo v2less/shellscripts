@@ -21,7 +21,7 @@ docker-compose up -d
 
 ## client
 ```bash
-rsync -avz host.com::share /path/to/folder
+export RSYNC_PASSWORD="yourpasswd"; rsync -avz host.com::share /path/to/folder
 #or
-rsync -avz --delete rsync://rsync@ip_addr/share/sdk ftp/
+export RSYNC_PASSWORD="yourpasswd"; rsync -avz --delete rsync://rsync@ip_addr/share/sdk ftp/
 ```
