@@ -1,0 +1,15 @@
+---
+version: "2"
+
+services:
+  trojan:
+    container_name: trojan
+    image: p4gefau1t/trojan-go
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - './client.json:/etc/trojan-go/config.json'
+      - './ca-cert.pem:/etc/trojan-go/ca-cert.pem'
+    ports:
+      - "1080:1080"
+    restart: always

@@ -1,0 +1,14 @@
+---
+version: "2"
+
+services:
+  xray:
+    container_name: xray
+    image: teddysun/xray
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - '/etc/xray/config.json:/etc/xray/config.json'
+    ports:
+      - "1080:1080"
+    restart: always

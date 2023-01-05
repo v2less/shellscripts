@@ -1,0 +1,40 @@
+{
+    "log": {
+        "loglevel": "warning"
+    },
+    "inbound": {
+        "listen": "0.0.0.0",
+        "port": 1080,
+        "protocol": "socks",
+        "settings": {
+            "auth": "noauth",
+            "udp": true,
+            "ip": "0.0.0.0"
+        }
+    },
+    "outbound": {
+        "protocol": "vmess",
+        "settings": {
+            "vnext": [
+                {
+                    "address": "abc.v2less.com",
+                    "port": 443,
+                    "users": [
+                        {
+                            "id": "a0836f20-4154-28c1-c7c0-d49e7242b9f2",
+                            "level": 1,
+                            "alterId": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        "streamSettings": {
+            "network": "ws",
+            "security": "tls",
+            "wssettings":{
+                "path":"/c58640f/"
+            }
+        }
+    }
+}
