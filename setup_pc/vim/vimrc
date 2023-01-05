@@ -47,7 +47,13 @@ autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 map <F5> :call CompileRunGcc()<CR>
 func! CompileRunGcc()
     exec "w"
-    if &filetype == 'sh'
+    if &filetype == 'c'
+        exec '!g++ % -o %<'
+        exec '!time ./%<'
+    elseif &filetype == 'cpp'
+        exec '!g++ % -o %<'
+        exec '!time ./%<'
+    elseif &filetype == 'sh'
         :!time bash %
     elseif &filetype == 'python'
         exec "!time python3.6 %"
