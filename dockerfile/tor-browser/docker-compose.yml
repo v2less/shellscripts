@@ -1,0 +1,18 @@
+---
+version: "2"
+
+services:
+  tor-browser:
+    container_name: tor-browser
+    image: kasmweb/tor-browser:1.11.0-rolling
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8953:53/udp"
+      - "127.0.0.1:9250:9150/tcp"
+      - "127.0.0.1:6901:6901/tcp"
+    environment:
+      VNC_PW: password
+      TZ: Asia/Shanghai
+    shm_size: '1024m'
+    restart: unless-stopped
