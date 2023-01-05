@@ -1,0 +1,14 @@
+---
+version: "2"
+
+services:
+  rsyncd:
+    build: .
+    image: vimagick/rsyncd
+    container_name: rsyncd
+    ports:
+      - "873:873"
+    volumes:
+#     - ./rsyncd.conf:/etc/rsyncd.conf
+      - '/data:/share'
+    restart: always
