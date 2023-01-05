@@ -122,15 +122,23 @@ let g:lightline = {
       \ },
       \ }
 
+" 该插件是添加一些分割线 比如你写python的时候 格式对齐 就可以通过这个分割线来 让你很直观的看到
+Plugin 'Yggdroot/indentLine'
+" 彩虹括号/圆括号
+Plugin 'frazrepo/vim-rainbow'
+let g:rainbow_active = 1
 " NERDTree是一款用来在Vim界面显示树形目录的文件管理器插件
 Plugin 'scrooloose/nerdtree'
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | exe 'cd '.argv()[0] | endif
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
+map <F3> :NERDTreeMirror<CR>
+map <F3> :NERDTreeToggle<CR>
 " fzf (FuZzy Finder)是一个使用go语言开发的模糊搜索工具，可以在bash、tmux等环境使用，也可以作为一种Vim插件来增强Vim的功能。
 Plugin 'junegunn/fzf',
 Plugin 'junegunn/fzf.vim',
+nnoremap <Leader>fu :FzfFunky<Cr>
 
 " vimwiki + Zettelkasten
 
