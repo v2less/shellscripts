@@ -1,0 +1,14 @@
+---
+version: "2"
+
+services:
+  v2ray:
+    container_name: v2ray
+    image: teddysun/v2ray
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - './config.json:/etc/v2ray/config.json'
+    ports:
+      - "1080:1080"
+    restart: always
