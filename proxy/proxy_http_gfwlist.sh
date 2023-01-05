@@ -7,7 +7,7 @@ http_proxy_port="3128"
 sudo apt install -y privoxy python3-pip proxychains
 sudo sed -ri '/^socks.*$/d' /etc/proxychains.conf
 sudo sed -ri '/^http.*$/d' /etc/proxychains.conf
-echo "http 127.0.0.1 8118" | sudo tee -a /etc/proxychains.conf
+echo "socks5 127.0.0.1 1080" | sudo tee -a /etc/proxychains.conf
 
 # 修改 privoxy 配置，默认使用 8118 本地端口
 grep -P '^listen-address\s+\d' /etc/privoxy/config || echo 'listen-address  0.0.0.0:8118' | sudo tee -a /etc/privoxy/config
@@ -75,3 +75,6 @@ export https_proxy=\$proxy
 "
 echo "Or use proxychains method"
 echo "exec proxychains -q bash"
+sudo sed -ri '/^socks.*$/d' /etc/proxychains.conf
+sudo sed -ri '/^http.*$/d' /etc/proxychains.conf
+echo "http 127.0.0.1 8118" | sudo tee -a /etc/proxychains.conf
