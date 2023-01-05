@@ -15,7 +15,11 @@ function install_vim() {
         cd "$HOME"/.vim/bundle/YouCompleteMe || exit
         git submodule update --init --recursive
         #./install.sh --clang-completer --system-libclang
-        python3 install.py --clangd-completer
+        if command -v go env; then
+            python3 install.py --clangd-completer --go-completer
+        else
+            python3 install.py --clangd-completer
+        fi
     fi
     vim +PluginInstall +qall
 }
