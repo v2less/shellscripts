@@ -2,8 +2,8 @@
 set -exo pipefail
 # 让 privoxy 代理服务器使用 gfwlist 自动分流
 # 请修改为可用的http代理
-http_proxy_ip="proxy02.xxxx.com"
-http_proxy_port="3128"
+http_proxy_ip="${1:-proxy02.xxxx.com}"
+http_proxy_port="${2:-3128}"
 sudo apt install -y privoxy python3-pip proxychains
 sudo sed -ri '/^socks.*$/d' /etc/proxychains.conf
 sudo sed -ri '/^http.*$/d' /etc/proxychains.conf
@@ -47,13 +47,16 @@ export https_proxy=$proxy
 python3 -m pip install pip --upgrade
 python3 -m pip install gfwlist2privoxy
 wget -O gfwlist.txt https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
-gfwlist2privoxy -i gfwlist.txt -f gfwlist.action --user-rule user.rule -p $http_proxy_ip:$http_proxy_port -t http
+gfwlist2privoxy -i gfwlist.txt -f gfwlist.action --user-rule user.rule -p "$http_proxy_ip:$http_proxy_port" -t http
 [ -f gfwlist.action ] || exit 1
 # 追加部分地址到user.action
 [ -f gfwlist.action ] && cat << EOF | tee direct.action
 {+forward-override{forward .}}
 .baidu.com
 .qq.com
+.uniontech.com
+.chinauos.com
+.deepin.com
 127.*.*.*
 192.*.*.*
 10.*.*.*
