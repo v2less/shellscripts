@@ -29,7 +29,7 @@ hugo site new "blog"
 pullblog(){
 cd ~/Documents/||exit 1
 rm -rf hugo || exit 1
-git clone git@github.com:sandylaw/hugo.git || exit 1
+git clone git@github.com:waytoarcher/hugo.git || exit 1
 cd hugo || exit 1
 git submodule update --init --recursive
 }

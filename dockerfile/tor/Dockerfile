@@ -5,6 +5,7 @@ LABEL version="latest"
 
 RUN echo '@edge https://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories && \
     echo '@edge https://dl-cdn.alpinelinux.org/alpine/edge/testing'   >> /etc/apk/repositories && \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/' /etc/apk/repositories && \
     apk -U upgrade && \
     apk -v add tor@edge obfs4proxy@edge curl && \
     chmod 700 /var/lib/tor && \
