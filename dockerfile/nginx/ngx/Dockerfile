@@ -1,0 +1,107 @@
+FROM alpine:3.16 AS alpine-base
+LABEL maintainer="waytoarcher@gmail.com"
+ARG BUILD_ROOT=/usr/local/nginx
+ARG CACHE_ROOT=/var/cache/nginx
+ARG NGINX_VERSION=1.23.3
+ARG OPENSSL_VERSION=1.1.1s
+ARG OPENSSL_SHA256=c5ac01e760ee6ff0dab61d6b2bbd30146724d063eb322180c6f18a6f74e4b6aa
+ARG FANCYINDEX_VERSION=0.5.2
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+WORKDIR /usr/local/nginx
+RUN apk update && \
+#安装wget 和git 我们为了使镜像最小化这个都放在另外一个镜像里面来实现
+    apk add --no-cache wget git && \
+#克隆我们需要的模块和主题
+    git clone https://github.com/fraoustin/Nginx-Fancyindex-Theme.git \
+    && wget -S -O nginx.tar.gz https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
+    && wget -S -O openssl.tar.gz https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
+    && wget -S -O ngx-fancyindex.tar.xz https://github.com/aperezdc/ngx-fancyindex/releases/download/v0.5.2/ngx-fancyindex-${FANCYINDEX_VERSION}.tar.xz \
+    && wget -S -O nginx-dav-ext-module.tar.gz https://github.com/arut/nginx-dav-ext-module/archive/refs/tags/v3.0.0.tar.gz \
+    && echo "$OPENSSL_SHA256 *openssl.tar.gz" | sha256sum -c - \
+    && mkdir nginx \
+    && mkdir openssl \
+    && mkdir ngx-fancyindex \
+    && mkdir nginx-dav-ext-module \
+    && tar --extract --file nginx.tar.gz --directory ./nginx --strip-components 1 \
+    && tar --extract --file openssl.tar.gz --directory ./openssl --strip-components 1 \
+    && tar --extract --file ngx-fancyindex.tar.xz --directory ./ngx-fancyindex --strip-components 1 \
+    && tar --extract --file nginx-dav-ext-module.tar.gz --directory ./nginx-dav-ext-module --strip-components 1
+
+FROM nginx:1.23.3
+LABEL maintainer="waytoarcher@gmail.com"
+ARG BUILD_ROOT=/usr/local/nginx
+ARG CACHE_ROOT=/var/cache/nginx
+ARG NGINX_VERSION=1.23.3
+ARG OPENSSL_VERSION=1.1.1s
+ARG OPENSSL_SHA256=c5ac01e760ee6ff0dab61d6b2bbd30146724d063eb322180c6f18a6f74e4b6aa
+ARG FANCYINDEX_VERSION=0.5.2
+ENV DEBIAN_FRONTEND=noninteractive
+# 安装服务
+RUN sed -ri "s;deb.debian.org;mirrors.tuna.tsinghua.edu.cn;g" "/etc/apt/sources.list" && \
+    sed -ri "s;security.debian.org;mirrors.tuna.tsinghua.edu.cn;g" "/etc/apt/sources.list"
+RUN set -ex \
+    && apt -qq update && apt -qq install -y make build-essential libtool zlib1g-dev openssl \
+       libssl-dev libpcre3 libpcre3-dev vim highlight fcgiwrap libxml2 libxml2-dev libxslt1-dev \
+    && apt-get clean && apt-get autoclean && apt-get autoremove
+WORKDIR /root
+#从上面一个镜像中把我们刚才下载安装的包拷贝到这个里面
+COPY --from=alpine-base /usr/local/nginx /usr/local/nginx
+RUN mkdir -p /var/run/nginx \
+    && mkdir -p /var/log/nginx \
+    && mkdir -p ${CACHE_ROOT} \
+    && mkdir -p ${CACHE_ROOT}/client_temp \
+    && mkdir -p ${BUILD_ROOT} \
+    && touch /var/run/nginx/nginx.pid \
+    && chown nginx:nginx /var/log/nginx \
+    && chown nginx:nginx ${CACHE_ROOT} \
+    && chown nginx:nginx /var/run/nginx/nginx.pid
+RUN cd ${BUILD_ROOT}/nginx \
+       && ./configure --prefix=/etc/nginx \
+       --sbin-path=/usr/sbin/nginx \
+       --modules-path=/usr/lib/nginx/modules \
+       --conf-path=/etc/nginx/nginx.conf \
+       --error-log-path=/var/log/nginx/error.log \
+       --http-log-path=/var/log/nginx/access.log \
+       --pid-path=/var/run/nginx.pid \
+       --lock-path=/var/run/nginx.lock \
+       --http-client-body-temp-path=${CACHE_ROOT}/client_temp \
+       --http-proxy-temp-path=${CACHE_ROOT}/proxy_temp \
+       --http-fastcgi-temp-path=${CACHE_ROOT}/fastcgi_temp \
+       --http-uwsgi-temp-path=${CACHE_ROOT}/uwsgi_temp \
+       --http-scgi-temp-path=${CACHE_ROOT}/scgi_temp \
+       --user=nginx --group=nginx \
+       --with-compat --with-file-aio --with-threads \
+       --with-http_addition_module \
+       --with-http_auth_request_module \
+       --with-http_dav_module \
+       --with-http_flv_module \
+       --with-http_gunzip_module \
+       --with-http_gzip_static_module \
+       --with-http_mp4_module \
+       --with-http_random_index_module \
+       --with-http_realip_module \
+       --with-http_secure_link_module \
+       --with-http_slice_module \
+       --with-http_ssl_module \
+       --with-http_stub_status_module \
+       --with-http_sub_module \
+       --with-http_v2_module \
+       --with-mail --with-mail_ssl_module \
+       --with-stream --with-stream_realip_module \
+       --with-stream_ssl_module --with-stream_ssl_preread_module \
+       --with-cc-opt='-g -O2 -ffile-prefix-map=/data/builder/debuild/nginx/debian/debuild-base/nginx=. -fstack-protector-strong -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fPIC' \
+       --with-ld-opt='-Wl,-z,relro -Wl,-z,now -Wl,--as-needed -pie' \
+       --add-module=${BUILD_ROOT}/ngx-fancyindex \
+       --with-http_dav_module --add-module=${BUILD_ROOT}/nginx-dav-ext-module \
+       --with-openssl=${BUILD_ROOT}/openssl \
+    && make \
+    && make install \
+    && strip /usr/sbin/nginx* \
+    && cd .. \
+    && rm -rf ${BUILD_ROOT} \
+    && apt remove -y make build-essential \
+    && mkdir -p ${CACHE_ROOT}/client_temp
+#把主题拷贝到网站根目录下,不使用默认的根目录,因为会包含index.html
+COPY --from=alpine-base /usr/local/nginx/Nginx-Fancyindex-Theme /www/html/fancyindex
+COPY ./40-start-fcgiwrap.sh /docker-entrypoint.d/40-start-fcgiwrap.sh
+
