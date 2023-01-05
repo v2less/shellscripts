@@ -1,0 +1,14 @@
+---
+version: "2"
+
+services:
+  tor:
+    build: .
+    container_name: tor
+    image: tor:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8853:53/udp"
+      - "127.0.0.1:9150:9150/tcp"
+    restart: unless-stopped
