@@ -1,0 +1,37 @@
+---
+rootfs_codename: "eagle" #产品代号
+distro_version: "V20" #大版本号
+distro_subversion: "1050" #小版本号
+distro_milestone: "release" #里程碑标记 release alpha beta RC PK
+distro_ui: "Professional" #输出镜像类型，Professional TC HD Standard
+branch: "gui" #产品类型/分支，gui cli fs_gui fs_cli
+chipset: "x86" #芯片型号 #Y
+oem_name: "generic" #厂商品牌 #Y
+oem_version: "generic" #定制项目版本号 #Y
+build_id: "1" #系统镜像批次号 #Y
+build_arch: "arm64" #构建cpu架构,可选择项amd64 arm64 all
+
+output_base: "uniontechos-{{ distro_version.split('V')[1] }}-{{ distro_ui }}-{{ distro_subversion }}-{{ rootfs_arch[ansible_architecture] | upper }}-{{ chipset }}-{{ oem_name }}_{{ oem_version }}_{{ build_id }}" #输出镜像基础名称 #Y
+product_info: "{{ os_version[distro_version] }}{{ os_milestone[distro_milestone] }}{{ os_ui[distro_ui] }}_{{ chipset }}_{{ oem_name }}_{{ oem_version }}_{{ build_id }}" #产品信息 #Y
+
+repo_base: "pools.uniontech.com" #软件源域名
+rootfs_repo: "http://{{ repo_base }}/desktop-professional" #构建base系统所用的源
+
+chroot_repo: #chroot环境所用的软件源，主要源由模板定义，可开放给用户选择添加ppa仓库 #Y
+  - "deb http://{{ repo_base }}/desktop-professional/ {{ rootfs_codename }}/{{ distro_subversion }} main contrib non-free"
+
+
+factory_repo: #出厂预制软件源
+  - "deb http://{{ repo_base }}/desktop-professional/ {{ rootfs_codename }}/{{ distro_subversion }} main contrib non-free"
+
+dev_factory_repo: #开发阶段预制软件源
+  - "deb http://zl.uniontech.com/aptly/smartos-base eagle main non-free"
+
+img_type: "iso" # 镜像类型:iso rootfs
+img_size: "4000" #rootfs img大小，单位Mib,合理控制，至少4000,最大8000 #Y
+default_username: "user" #rootfs默认用户名 #Y
+default_passwd: "uos123" #rootfs默认密码 #Y
+default_hostname: "user" #rootfs默认主机名 #Y
+
+update_base: "off" #是否更新base基础镜像（当更换仓库地址，或版本升级1020->1030，需要重新生成base基础包）默认off，警告用户打开 #Y
+

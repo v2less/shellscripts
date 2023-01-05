@@ -1,0 +1,11 @@
+---
+- name: Rootfs
+  hosts: local
+  gather_facts: true
+  become: true
+
+  vars_files:
+    - ../edition/main.yml
+
+  roles:
+    - role: rootfs

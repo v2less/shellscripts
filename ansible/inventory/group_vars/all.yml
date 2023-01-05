@@ -1,0 +1,52 @@
+---
+gitbranch: "master"
+commit_id: "HEAD"
+img_type: "rootfs"
+img_size: "4000"
+rootfs_base: "/var/tmp"
+rootfs_root: "{{ rootfs_base }}/rootfs"
+build_root: "{{ rootfs_base }}/build"
+rootfs_arch:
+  x86_64: "amd64"
+  aarch64: "arm64"
+  mips64: "mips64el"
+os_version:
+  V20: "1"
+  V23: "2"
+  V26: "3"
+  V29: "4"
+  V32: "5"
+  V35: "6"
+os_milestone:
+  release: "0"
+  alpha: "1"
+  beta: "2"
+  RC: "3"
+  PK: "4"
+os_ui:
+  Professional: "1"
+  TC: "2"
+  HD: "3"
+  Standard: "4"
+
+rootfs_codename: "eagle"
+repo_base: "zl.uniontech.com"
+rootfs_repo: "http://{{ repo_base }}/aptly/wayland-base-external"
+chroot_repo:
+  - "deb http://{{ repo_base }}/aptly/wayland-base-external/ {{ rootfs_codename }} main non-free"
+  - "deb [trusted=yes] http://zl.uniontech.com/aptly/wayland-master-dev/ unstable main non-free"
+ppa_packages:
+  - { name: 'ppa1', url: 'http://zl.uniontech.com/aptly/wayland-master-dev/dists/unstable/main/binary-arm64/Packages' }
+distro_name: "UnionTech OS"
+distro_version: "20"
+distro_subversion: "1040"
+distro_codename: "eagle"
+distro_ui: "gui"
+distro_status: "Snapshot"
+current_date: "{{ ansible_date_time.date | replace('-', '') }}"
+current_time: "{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}"
+#output_base: "uniontechos-device-{{ distro_version }}-{{ distro_ui }}-{{ distro_subversion }}_{{ rootfs_arch[ansible_architecture] | upper }}"
+output_base: "UnionTech-OS-Smart-20-TC-1.0.0-arm64-RK-1"
+output_iso_name: "{{ output_base }}-{{ current_date }}-{{ current_time }}.iso"
+output_rootfs_name: "{{ output_base }}-{{ current_date }}-{{ current_time }}"
+

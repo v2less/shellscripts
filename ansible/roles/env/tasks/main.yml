@@ -1,0 +1,15 @@
+---
+- name: Install require module
+  pip:
+    name:
+      - github3.py
+    executable: pip3
+    state: present
+
+- name: Set sudo
+  lineinfile:
+    path: "/etc/sudoers"
+    regexp: '^%sudo'
+    line: "%sudo ALL=(ALL:ALL) NOPASSWD: ALL"
+    validate: "/usr/sbin/visudo -cf %s"
+    mode: 0440

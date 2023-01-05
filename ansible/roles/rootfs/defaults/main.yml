@@ -1,0 +1,7 @@
+---
+rootfs_include_packages:
+  - dbus
+  - deepin-keyring
+  - python3
+  - python3-apt
+  - wget

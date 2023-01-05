@@ -1,0 +1,82 @@
+---
+
+- name: Ensure rootfs base directory exist
+  file:
+    path: "{{ rootfs_base }}"
+    state: directory
+    mode: 0777
+
+- name: Ensure rootfs root directory exist
+  file:
+    path: "{{ rootfs_root }}"
+    state: directory
+    mode: 0755
+
+- name: Set repo_name
+  command: "basename {{ rootfs_repo }}"
+  register: repo_name
+  changed_when: repo_name.rc == 0
+  tags:
+    - repo_name
+
+# 确保base镜像存在，如果不存在，则生成
+- name: check base_{{ repo_name.stdout }}_{{ build_arch }}_{{ branch }}.tgz exits
+  stat:
+    path: "/var/tmp/base_{{ repo_name.stdout }}_{{ rootfs_codename }}_{{ build_arch }}_{{ branch }}.tgz"
+  register: base_file_status
+
+- name: Delete base.tgz
+  file:
+    path: "/var/tmp/base_{{ repo_name.stdout }}_{{ rootfs_codename }}_{{ build_arch }}_{{ branch }}.tgz"
+    state: absent
+  when: update_base == "on" and base_file_status.stat.exists
+
+- name: Bootstrap base system
+  shell: >-
+    debootstrap
+    --no-check-gpg
+    --arch={{ rootfs_arch[ansible_architecture] }}
+    --include={{ rootfs_include_packages | join(',') }}
+    {{ rootfs_codename }}
+    {{ rootfs_root }}
+    {{ rootfs_repo }}
+    && touch .uos_device_bootstraped
+  args:
+    chdir: "{{ rootfs_base }}"
+    creates: .uos_device_bootstraped
+  when: rootfs_arch[ansible_architecture] == build_arch and (update_base == "on" or not base_file_status.stat.exists)
+
+- name: Qemu-dootstrap base system
+  shell: >-
+    qemu-debootstrap
+    --no-check-gpg
+    --arch={{ build_arch }}
+    --include={{ rootfs_include_packages | join(',') }}
+    {{ rootfs_codename }}
+    {{ rootfs_root }}
+    {{ rootfs_repo }}
+    && touch .uos_device_bootstraped
+  args:
+    chdir: "{{ rootfs_base }}"
+    creates: .uos_device_bootstraped
+  when: rootfs_arch[ansible_architecture] != build_arch and (update_base == "on" or not base_file_status.stat.exists)
+
+- name: Generate base_{{ repo_name.stdout }}_{{ rootfs_codename }}_{{ build_arch }}_{{ branch }}.tgz # noqa 303
+  command:
+    cmd: /usr/bin/tar -czf /var/tmp/base_{{ repo_name.stdout }}_{{ rootfs_codename }}_{{ build_arch }}_{{ branch }}.tgz ./
+    chdir: "{{ rootfs_root }}"
+  when: update_base == "on" or not base_file_status.stat.exists
+
+- name: Sync to disk
+  command: "sync"
+  changed_when: true
+
+- name: Use exists base_{{ repo_name.stdout }}_{{ rootfs_codename }}_{{ build_arch }}_{{ branch }}.tgz # noqa 303
+  command:
+    cmd: /usr/bin/tar -xzf /var/tmp/base_{{ repo_name.stdout }}_{{ rootfs_codename }}_{{ build_arch }}_{{ branch }}.tgz -C {{ rootfs_root }}
+  when: update_base == "off" and base_file_status.stat.exists
+
+- name: Delete machine-id
+  file:
+    path: "{{ rootfs_root }}/etc/machine-id"
+    state: absent
