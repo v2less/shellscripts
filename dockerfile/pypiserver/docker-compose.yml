@@ -1,0 +1,15 @@
+version: '2'
+services:
+
+  pypiserver:
+    image: pypiserver/pypiserver:v1.5.1
+    container_name: pypiserver
+    volumes:
+      - ./packages:/data/packages
+      - type: bind
+        source: ./auth
+        target: /data/auth
+    command: --fallback-url https://pypi.tuna.tsinghua.edu.cn/simple -P /data/auth/.htpasswd -a update --overwrite /data/packages
+    ports:
+      - 8080:8080
+    restart: always
