@@ -4,7 +4,7 @@
 function k2pdf() {
 	local file=${1}
 	if [ -f "${file}" ]; then
-		K2pdfopt -dev kv -wrap+ -ws 0.01 -as -c -ls "${file}"
+		k2pdfopt -dev kv -ocr -ocrlang eng+chi_sim -wrap+ -x -ws 0.01 -as- -c -ui- "${file}"
 	else
 		echo "Please check the pdf file."
 	fi
