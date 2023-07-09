@@ -31,14 +31,13 @@ function install_oh_my_zsh() {
     sudo apt update || exit
     sudo apt install -y zsh fonts-powerline curl git || exit
     cd "$HOME" || exit
-    rm -rf "$HOME"/.local/share/fonts
     mkdir -p "$HOME"/.local/share/fonts
     cd "$HOME"/.local/share/fonts || exit
     while true; do
-        wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf || true
-        wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf || true
-        wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf || true
-        wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf || true
+        wget -O MesloLGS\ NF\ Regular.ttf https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf || true
+        wget -O MesloLGS\ NF\ Bold.ttf https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf || true
+        wget -O MesloLGS\ NF\ Italic.ttf https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf || true
+        wget -O MesloLGS\ NF\ Bold\ Italic.ttf https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf || true
         fontsnu=$(find "$HOME"/.local/share/fonts/ -name "MesloLGS*" | wc -l)
         if [ "$fontsnu" == 4 ]; then
             break

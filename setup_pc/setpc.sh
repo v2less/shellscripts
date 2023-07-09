@@ -54,11 +54,11 @@ function install_common_soft() {
     curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo \
   "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://mirrors.aliyun.com/docker-ce/linux/debian \
-  buster stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y git git-review tree unzip build-essential curl wget aria2 firefox-esr keepassxc python3-pip telegram-desktop mpv gnome-terminal mousepad fakeroot manpages-zh debhelper htop
-    sudo apt install -y devscripts pbuilder qt5-default qt5-qmake cmake neofetch xclip golang privoxy proxychains jq screen ctags
+    sudo apt install -y devscripts pbuilder cmake neofetch xclip golang privoxy proxychains jq screen universal-ctags
     sudo apt install -y docker-ce docker-ce-cli containerd.io
     sudo systemctl enable docker --now
     mkdir -p "$HOME"/.config/pip
