@@ -58,7 +58,7 @@ function install_common_soft() {
 
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y git git-review tree unzip build-essential curl wget aria2 firefox-esr keepassxc python3-pip telegram-desktop mpv gnome-terminal mousepad fakeroot manpages-zh debhelper htop
-    sudo apt install -y devscripts pbuilder cmake neofetch xclip golang privoxy proxychains jq screen universal-ctags
+    sudo apt install -y devscripts pbuilder cmake neofetch xclip privoxy proxychains jq screen universal-ctags
     sudo apt install -y docker-ce docker-ce-cli containerd.io
     sudo systemctl enable docker --now
     mkdir -p "$HOME"/.config/pip
