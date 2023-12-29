@@ -1,0 +1,44 @@
+# https://hub.docker.com/r/gerritcodereview/gerrit
+version: '3'
+
+services:
+  gerrit:
+    container_name: gerrit_server
+    image: gerritcodereview/gerrit
+    user: root
+    ports:
+      - "29418:29418"
+      - "80:8080"
+    depends_on:
+      - ldap
+    volumes:
+      - ./gerrit/etc:/var/gerrit/etc
+      - ./gerrit/git:/var/gerrit/git
+      - ./gerrit/db:/var/gerrit/db
+      - ./gerrit/index:/var/gerrit/index
+      - ./gerrit/cache:/var/gerrit/cache
+    environment:
+      - CANONICAL_WEB_URL=http://192.168.2.111:80
+    # command: init  # 首次执行必须取消此行注释
+
+  ldap:
+    container_name: gerrit_openldap
+    image: osixia/openldap
+    restart: always
+    ports:
+      - "389:389"
+      - "636:636"
+    environment:
+      - LDAP_ADMIN_PASSWORD=ladp_passwd  # 与secure.config一致
+    volumes:
+      - ./ldap/var:/var/lib/ldap
+      - ./ldap/etc:/etc/ldap/slapd.d
+
+  ldap-admin:
+    container_name: gerrit_phpldapadmin
+    image: osixia/phpldapadmin
+    restart: always
+    ports:
+      - "443:443"
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap
