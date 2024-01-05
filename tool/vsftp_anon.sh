@@ -1,7 +1,6 @@
 #!/bin/bash
 # setup vsftp for repo.
-# by user <user@uniontech.com> 2020-11-18
-function package() {
+package() {
     packages=("$@")
     apt=$(command -v apt-get)
     yum=$(command -v yum)
@@ -22,10 +21,6 @@ function package() {
         echo "Err: no path to apt-get or yum" >&2
     fi
 }
-
-if ! vsftpdwho &> /dev/null; then
-        package vsftpd
-fi
 vsftp_anon(){
 sudo sed -ri '/anonymous_enable/d' /etc/vsftpd.conf &> /dev/null
 sudo sed -ri '/no_anon_password/d' /etc/vsftpd.conf &> /dev/null
@@ -34,4 +29,8 @@ sudo sed -ri "/listen_ipv6/aanonymous_enable=YES\nno_anon_password=YES\nanon_roo
 sudo sed -ri '/utf8_filesystem/cutf8_filesystem=YES' /etc/vsftpd.conf &> /dev/null
 sudo systemctl restart vsftpd.service
 }
+
+if ! vsftpdwho &> /dev/null; then
+    package vsftpd
+fi
 vsftp_anon

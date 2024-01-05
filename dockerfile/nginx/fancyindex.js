@@ -292,7 +292,8 @@ for (var i = 0; i < listOfItems.length; ++i) {
         txtInfo_tmp = txtInfo_tmp_date.replace('-Jan-', '-01-').replace('-Feb-', '-02-').replace('-Mar-', '-03-').replace('-Apr-', '-04-').replace('-May-', '-05-').replace('-Jun-', '-06-').replace('-Jul-', '-07-').replace('-Aug-', '-08-').replace('-Sept-', '-09-').replace('-Oct-', '-10-').replace('-Nov-', '-11-').replace('-Dec-', '-12-') + "     "
     }
     if (size != "") {
-        ke_size = getfilesize(size).replace(/ /g,'');
+        ke_size = size.replace(/ /g,'');
+        //ke_size = getfilesize(size).replace(/ /g,'');
         txtInfo_tmp = txtInfo_tmp + "文件尺寸:" + ke_size;
     }
     txtInfo = txtInfo_tmp
