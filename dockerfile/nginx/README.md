@@ -5,11 +5,18 @@ htpasswd -c .htpasswd user
 ```
 ## 构建docker镜像
 ```bash
-docker-compose build --build-arg http_proxy=http://10.12.17.80:8118 --build-arg https_proxy=http://10.12.17.80:8118 mynginx-alpine
+docker-compose build --build-arg http_proxy=http://10.12.17.80:8118 --build-arg https_proxy=http://10.12.17.80:8118 mynginx
 ```
 ## 启动docker镜像
 ```bash
-docker-compose up -d mynginx-alpine
+docker-compose up -d
+```
+### 将fancyindex复制出来
+```bash
+docker cp -a e2d413be7615:/www/html/fancyindex ./
+cp fancyindex.js fancyindex/
+docker-compose down
+docker-compose up -d
 ```
 ## data目录权限改为777
 
