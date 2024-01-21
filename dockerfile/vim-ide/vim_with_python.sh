@@ -14,7 +14,7 @@ export LDFLAGS="-fno-lto"
             --enable-cscope \
             --prefix=/usr/local
 
-make VIMRUNTIMEDIR=/usr/local/share/vim/vim90
+make VIMRUNTIMEDIR=/usr/local/share/vim/vim91
 
 make install
 ln -sf /usr/local/bin/vim /bin/vi
