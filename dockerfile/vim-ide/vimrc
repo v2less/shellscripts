@@ -40,6 +40,7 @@ set expandtab       " Expand TABs to spaces
 
 " add yaml stuffs
 au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
+autocmd BufWritePre * :%s/\s\+$//e
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
 :nnoremap <F2> :setl noai nocin nosi inde=<CR>
@@ -255,6 +256,7 @@ colorscheme codedark
 
 " Track the engine.
 Plugin 'SirVer/ultisnips'
+Plugin 'stephpy/vim-yaml'
 
 " Snippets are separated from the engine. Add this if you want them:
 Plugin 'honza/vim-snippets'
