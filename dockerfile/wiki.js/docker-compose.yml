@@ -27,5 +27,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./wiki-data:/wiki/data
+      - ./.ssh:/home/node/.ssh #主要是ssh config配置和key
     ports:
       - "3000:3000"
