@@ -111,7 +111,7 @@ Group=$user
 WorkingDirectory=$HOME
 
 PIDFile=$HOME/.vnc/%H:%i.pid
-ExecStartPre=/usr/bin/vncserver -kill :%i > /dev/null 2>&1
+ExecStartPre=/bin/bash -c '/usr/bin/vncserver -kill :%i > /dev/null 2>&1 || :'
 ExecStart=/usr/bin/vncserver -depth 24 -geometry 1920x1080 :%i
 ExecStop=/usr/bin/vncserver -kill :%i
 
