@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  jenkins:
+    image: my-jenkins:2.440.3-lts-jdk17
+    build: .
+    container_name: jenkins
+    restart: always
+    user: "1002:999"  # 假设 启动容器的用户的 UID 是 1002, Docker 组的 GID 是 999
+    #network_mode: "host"  # 使用主机的网络模式
+    ports:
+      - 8082:8080
+      - 50002:50000
+    volumes:
+      - ./jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/$USER/.ssh:/var/jenkins_home/.ssh
+      - /data:/data
+      - /data-hdd:/data-hdd
+      - /var/tmp/workdir:/var/tmp/workdir
+    environment:
+      TZ: Asia/Shanghai
+      JENKINS_OPTS: "--prefix=/jenkins"
+      JAVA_OPTS: "-Djava.awt.headless=true -Djsch.client_pubkey='ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa' -Djsch.server_host_key='ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa'"
+
