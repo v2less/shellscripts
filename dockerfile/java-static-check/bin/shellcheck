@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#echo "checkstyle >> received [$@]"
+/usr/local/lib/shellcheck/shellcheck -f checkstyle -s bash -x "$@"

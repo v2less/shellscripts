@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#echo "checkstyle >> received [$@]"
+/usr/local/lib/shfmt -i 4 -bn -ci -sr -kp -l -d "$@"

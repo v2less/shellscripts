@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#echo "checkstyle >> received [$@]"
+java -jar /usr/local/lib/checkstyle.jar "$@"

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#echo "checkstyle >> received [$@]"
+cppcheck --enable=all --xml-version=2 --force "$@"

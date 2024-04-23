@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#echo "checkstyle >> received [$@]"
+/usr/bin/pylint --load-plugins=pylint_json2checkstyle.checkstyle_reporter --output-format=checkstyle -r y "$@"
