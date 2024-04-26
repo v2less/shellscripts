@@ -23,7 +23,7 @@ RUN apt-get update && apt-get upgrade -y && \
     libmpc-dev cpio rsync dosfstools kmod gdisk wget git meson cmake libglib2.0-dev \
     # Install additional packages (for building mesa3d, libcamera and other meson-based components)
     python3-pip pkg-config python3-dev ninja-build aapt python2.7 vim openjdk-11-jdk \
-    tzdata net-tools bc locales \
+    tzdata net-tools bc locales p7zip-full s-nail acl jq git-review ccache \
     # Install additional packages (required by repo utility)
     # python-is-python3 \
     # Add extra tools
@@ -60,8 +60,9 @@ RUN chown -R ${RUN_USER}:${RUN_USER} ${USER_HOME} && chmod -R 775 ${USER_HOME}
 # Ensure sudo group users are not
 # asked for a password when using
 # sudo command by ammending sudoers file
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> \
-/etc/sudoers
+RUN echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+      && echo "${RUN_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+      && mkdir -p /etc/sudoers.d
 RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
 # Pass control to a newly created user
