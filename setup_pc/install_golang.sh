@@ -6,7 +6,9 @@
 #
 # Add to your .profile, .bash_profile or .zshenv:
 # export PATH=$PATH:/usr/local/go/bin
-
+export proxy=http://Clash:u75Fm9qG@10.31.1.208:37890
+export http_proxy=$proxy
+export https_proxy=$proxy
 error_string=("Error: This command has to be run with superuser"
   "privileges (under the root user on most systems).")
 if [[ $(id -u) -ne 0 ]]; then echo "${error_string[@]}" >&2; exit 1; fi
@@ -27,7 +29,7 @@ update_go() {
   local arch="$1"
   local os="$2"
 
-  local go_url="https://golang.org/dl/${version}.${os}-${arch}.tar.gz"
+  local go_url="https://go.dev/dl/${version}.${os}-${arch}.tar.gz"
 
   curl -so "/tmp/${version}.${os}-${arch}.tar.gz" -L "$go_url" && \
     rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/${version}.${os}-${arch}.tar.gz
