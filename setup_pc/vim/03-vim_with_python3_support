@@ -15,8 +15,8 @@ export LDFLAGS="-fno-lto"
             --enable-gui=gtk2 \
             --enable-cscope \
             --prefix=/usr/local
-
-make VIMRUNTIMEDIR=/usr/local/share/vim/vim90
+default_vimruntime_dir=$(grep default_vimruntime_dir src/auto/pathdef.c | awk -F'"' '{print $2}')
+make VIMRUNTIMEDIR=${default_vimruntime_dir}
 
 sudo make install
 sudo ln -sf /usr/local/bin/vim /bin/vi

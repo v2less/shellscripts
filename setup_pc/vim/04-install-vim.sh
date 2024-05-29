@@ -16,6 +16,7 @@ function install_vim() {
         git submodule update --init --recursive
         #./install.sh --clang-completer --system-libclang
         if command -v go env; then
+            export GOPROXY=https://goproxy.io,direct
             python3 install.py --clangd-completer --go-completer
         else
             python3 install.py --clangd-completer
