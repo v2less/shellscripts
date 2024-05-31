@@ -19,42 +19,61 @@ if [ "$(id -u)" -eq 0 ]; then
     echo "此脚本需要以普通用户权限运行"
     exit 1
 fi
+command_exists() {
+    command -v "$1" > /dev/null 2>&1
+}
 menu_options=(
     "更换较快apt软件源"
     "更新系统软件包"
     "安装常用软件包"
+    "安装Android构建本地环境"
     "安装项目构建用的docker环境"
     "挂载90的代码镜像samba服务到本地"
     "配置git提交模板"
+    "启用SSH服务"
+    "安装ADB"
     "安装VSCode"
     "安装PyCharm"
+    "安装Btop"
+    "安装oh-my-bash"
+    "安装oh-my-zsh"
+    "安装Python3.6"
     "安装命令行类代理工具"
     "安装SVN"
     "安装谷歌浏览器"
     "单独安装docker"
     "单独配置docker镜像"
     "安装静态检查工具"
+    "安装Jenkins服务"
     "配置Jenkins构建节点环境"
     "更新脚本"
 )
 
 commands=(
-      ["更换较快apt软件源"]="use_local_apt_mirror"
-      ["更新系统软件包"]="update_system_packages"
-      ["安装常用软件包"]="install_common_soft"
-      ["安装项目构建用的docker环境"]="install_docker_for_build"
-      ["挂载90的代码镜像samba服务到本地"]="mount_90_mirror_samba"
-      ["配置git提交模板"]="config_git_commit_template"
-      ["安装VSCode"]="install_vscode"
-      ["安装PyCharm"]="install_pycharm"
-      ["安装命令行类代理工具"]="install_proxytool"
-      ["安装SVN"]="install_svn"
-      ["安装谷歌浏览器"]="install_chrome"
-      ["单独安装docker"]="install_docker"
-      ["单独配置docker镜像"]="config_docker"
-      ["安装静态检查工具"]="install_check_and_format"
-      ["配置Jenkins构建节点环境"]="setup_build_node"
-      ["更新脚本"]="update_scripts"
+     ["更换较快apt软件源"]="use_local_apt_mirror"
+     ["更新系统软件包"]="update_system_packages"
+     ["安装常用软件包"]="install_common_soft"
+     ["安装Android构建本地环境"]="install_android_build"
+     ["安装项目构建用的docker环境"]="install_docker_for_build"
+     ["挂载90的代码镜像samba服务到本地"]="mount_90_mirror_samba"
+     ["配置git提交模板"]="config_git_commit_template"
+     ["启用SSH服务"]="enable_ssh"
+     ["安装ADB"]="install_adb"
+     ["安装VSCode"]="install_vscode"
+     ["安装PyCharm"]="install_pycharm"
+     ["安装Btop"]="enable_btop"
+     ["安装oh-my-bash"]="install_oh_my_bash"
+     ["安装oh-my-zsh"]="install_oh_my_zsh"
+     ["安装Python3.6"]="install_python36"
+     ["安装命令行类代理工具"]="install_proxytool"
+     ["安装SVN"]="install_svn"
+     ["安装谷歌浏览器"]="install_chrome"
+     ["单独安装docker"]="install_docker"
+     ["单独配置docker镜像"]="config_docker"
+     ["安装静态检查工具"]="install_check_and_format"
+     ["安装Jenkins服务"]="install_jenkins"
+     ["配置Jenkins构建节点环境"]="setup_build_node"
+     ["更新脚本"]="update_scripts"
 )
 update_scripts() {
     wget -O pi.sh https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/zero3/pi.sh && chmod +x pi.sh
@@ -153,6 +172,212 @@ update_system_packages() {
     else
         echo "curl is already installed."
     fi
+}
+# 函数：检查并启动 SSH
+enable_ssh() {
+    # 检查 openssh-server 是否安装
+    if dpkg -l | grep -q openssh-server; then
+        echo "openssh-server 已安装。"
+    else
+        echo "openssh-server 未安装，正在安装..."
+        sudo apt-get update
+        sudo apt-get install openssh-server -y
+    fi
+
+    # 启动 SSH 服务
+    sudo systemctl start ssh
+    echo "SSH 服务已启动。"
+
+    # 设置 SSH 服务开机自启
+    sudo systemctl enable ssh
+    echo "SSH 服务已设置为开机自启。"
+
+    # 显示 SSH 服务状态
+    sudo systemctl status ssh
+}
+update_path() {
+    PROFILE_FILE="$1"
+    if [ -f "$PROFILE_FILE" ]; then
+        if ! grep -q "export PATH=\$PATH:/usr/local/platform-tools" "$PROFILE_FILE"; then
+            echo "export PATH=\$PATH:/usr/local/platform-tools" >> "$PROFILE_FILE"
+            echo "Added platform-tools to the PATH in $PROFILE_FILE."
+        fi
+    fi
+}
+install_adb() {
+    # Check if ADB is already installed
+    if command_exists adb; then
+        echo "ADB is already installed."
+        adb version
+        exit 0
+    fi
+
+    # Determine the architecture
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ]; then
+        ADB_ZIP="platform-tools-latest-linux.zip"
+    else
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+    fi
+
+    # Download the latest platform tools
+    echo "Downloading ADB platform tools from Google..."
+    wget -q https://dl.google.com/android/repository/${ADB_ZIP} -O /tmp/${ADB_ZIP}
+
+    # Extract the downloaded zip file
+    echo "Extracting ADB platform tools..."
+    unzip -q /tmp/${ADB_ZIP} -d /tmp
+
+    # Move the platform tools to /usr/local
+    echo "Installing ADB..."
+    sudo mv -f /tmp/platform-tools /usr/local/platform-tools
+
+    # Clean up
+    rm /tmp/${ADB_ZIP}
+    # Update PATH in .bashrc and .zshrc
+    [[ -f "$HOME/.bashrc" ]] && update_path "$HOME/.bashrc"
+    [[ -f "$HOME/.zshrc" ]] && update_path "$HOME/.zshrc"
+
+    # Refresh the current shell environment
+    export PATH=$PATH:/usr/local/platform-tools
+
+    # Verify installation
+    if command_exists adb; then
+        echo "ADB successfully installed."
+        adb version
+    else
+        echo "Failed to install ADB."
+        exit 1
+    fi
+
+    echo "Installation completed. You may need to restart your terminal or source your ~/.bashrc to use ADB."
+}
+# 安装btop
+enable_btop() {
+    # 尝试使用 apt 安装 btop
+    if sudo apt-get update > /dev/null 2>&1 && sudo apt-get install -y btop 2> /dev/null; then
+        echo "btop successfully installed using apt."
+        return 0
+    else
+        echo "Failed to install btop using apt, trying snap..."
+
+        # 检查 snap 是否已安装
+        if ! command -v snap > /dev/null; then
+            echo "Snap is not installed. Installing snapd..."
+            if ! sudo apt-get install -y snapd; then
+                echo "Failed to install snapd."
+                return 1
+            fi
+            echo "Snapd installed successfully."
+        else
+            echo "Snap is already installed."
+        fi
+
+        # 使用 snap 安装 btop
+        if sudo snap install btop; then
+            echo "btop successfully installed using snap."
+            # 定义要添加的路径
+            path_to_add="/snap/bin"
+            # 检查 ~/.bashrc 中是否已存在该路径
+            if ! grep -q "export PATH=\$PATH:$path_to_add" ~/.bashrc; then
+                # 如果不存在，将其添加到 ~/.bashrc 文件的末尾
+                echo "export PATH=\$PATH:$path_to_add" >> ~/.bashrc
+                echo "Path $path_to_add added to ~/.bashrc"
+            else
+                echo "Path $path_to_add already in ~/.bashrc"
+            fi
+            # 重新加载 ~/.bashrc
+            source "$HOME/.bashrc"
+            Show 0 "btop已经安装,你可以使用btop命令了"
+            return 0
+        else
+            echo "Failed to install btop using snap."
+            return 1
+        fi
+    fi
+}
+install_python36() {
+    sudo apt-get install build-essential
+    cd /tmp || exit 1
+    wget --no-check-certificate https://www.python.org/ftp/python/3.6.5/Python-3.6.5.tgz
+    tar -xzvf Python-3.6.5.tgz
+    cd Python-3.6.5 || exit 1
+    ./configure --prefix=/usr/local/python3.6.5
+    make
+    sudo make install
+    sudo cp -f /usr/bin/python /usr/bin/python_bak
+    sudo rm -f /usr/bin/python
+    sudo ln -sf /usr/local/Python-3.6.5/bin/python3.6 /usr/bin/python
+}
+install_oh_my_bash() {
+    bash -c "$(curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+}
+install_oh_my_zsh() {
+    exec > >(tee -i /tmp/install_zsh.log)
+    exec 2>&1
+    sudo apt update || exit
+    sudo apt install -y zsh fonts-powerline curl git || exit
+    cd "$HOME" || exit
+    mkdir -p "$HOME"/.local/share/fonts
+    cd "$HOME"/.local/share/fonts || exit
+    while true; do
+        wget -O MesloLGS\ NF\ Regular.ttf https://mirror.ghproxy.com/https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf || true
+        wget -O MesloLGS\ NF\ Bold.ttf https://mirror.ghproxy.com/https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf || true
+        wget -O MesloLGS\ NF\ Italic.ttf https://mirror.ghproxy.com/https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf || true
+        wget -O MesloLGS\ NF\ Bold\ Italic.ttf https://mirror.ghproxy.com/https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf || true
+        fontsnu=$(find "$HOME"/.local/share/fonts/ -name "MesloLGS*" | wc -l)
+        if [ "$fontsnu" == 4 ]; then
+            break
+        fi
+    done
+    fc-cache -v
+    cd "$HOME" || exit
+    echo "INFO Now start install zsh:"
+    echo "When zsh have been installed,pleast input exit , back to continue run……"
+    echo "When zsh have been installed,pleast input exit , back to continue run……"
+    sleep 5
+    i=0
+    while true; do
+        i=$((i + 1))
+        wget -O - https://mirror.ghproxy.com/https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | bash - || true
+        if [ -f "$HOME"/.oh-my-zsh/oh-my-zsh.sh ]; then
+            break
+        fi
+        if [ $i -gt 30 ]; then
+            echo "Check the internet."
+            exit 1
+        fi
+    done
+    cp "$HOME"/.oh-my-zsh/templates/zshrc.zsh-template "$HOME"/.zshrc
+    while true; do
+        if git clone https://mirror.ghproxy.com/https://github.com/zsh-users/zsh-autosuggestions "$HOME"/.oh-my-zsh/custom/plugins/zsh-autosuggestions; then
+            break
+        fi
+    done
+    while true; do
+        if git clone https://mirror.ghproxy.com/https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME"/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting; then
+            break
+        fi
+    done
+    while true; do
+        if git clone https://mirror.ghproxy.com/https://github.com/sukkaw/zsh-proxy.git "$HOME"/.oh-my-zsh/custom/plugins/zsh-proxy; then
+            break
+        fi
+    done
+    while true; do
+        if git clone --depth=1 https://mirror.ghproxy.com/https://github.com/romkatv/powerlevel10k.git "$HOME"/.oh-my-zsh/custom/themes/powerlevel10k; then
+            break
+        fi
+    done
+    sed -ri '/^plugins/c plugins=(git zsh-proxy colored-man-pages zsh-autosuggestions zsh-syntax-highlighting)' "$HOME"/.zshrc
+    sed -ri '/^#[ *]HIST_STAMPS/c HIST_STAMPS="yyyy-mm-dd"' "$HOME"/.zshrc
+    sed -ri '/^ZSH_THEME/c ZSH_THEME="powerlevel10k/powerlevel10k"' "$HOME"/.zshrc
+    sed -ri "/^POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true/d" "$HOME"/.zshrc
+    sed -ri "\$aPOWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true" "$HOME"/.zshrc
+    echo "change default sh to zsh:"
+    chsh -s "$(which zsh)"
+    echo "$SHELL"
 }
 install_docker() {
     bash <(wget -q -O - https://get.docker.com) --mirror Aliyun
@@ -284,8 +509,46 @@ extract()  {
         printf "'%s'is not a valid file\n" "$1"
     fi
 }
+install_android_build() {
+    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    # Install Google recommended packages ( https://source.android.com/setup/build/initializing#installing-required-packages-ubuntu-1804 )
+    case $codename in
+        nodle)
+            # ubuntu24.04没有python2 libncurses5
+            sudo apt-get install -y git-core gnupg flex bison build-essential zip \
+                curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses6-dev \
+                x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
+                libxml2-utils xsltproc unzip fontconfig \
+                swig libssl-dev flex bison device-tree-compiler mtools gettext libncurses6 libgmp-dev \
+                libmpc-dev cpio rsync dosfstools kmod gdisk wget git meson cmake libglib2.0-dev \
+                python3-pip pkg-config python3-dev ninja-build aapt vim openjdk-17-jdk \
+                tzdata net-tools bc locales p7zip-full s-nail acl jq git-review ccache \
+                sudo
+            sudo wget -P /usr/local/bin https://storage.googleapis.com/git-repo-downloads/repo
+            sudo chmod a+x /usr/local/bin/repo
+            ;;
+            *)
+            sudo apt-get install -y git-core gnupg flex bison build-essential zip \
+                curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev \
+                x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
+                libxml2-utils xsltproc unzip fontconfig \
+                swig libssl-dev flex bison device-tree-compiler mtools gettext libncurses5 libgmp-dev \
+                libmpc-dev cpio rsync dosfstools kmod gdisk wget git meson cmake libglib2.0-dev \
+                python3-pip pkg-config python3-dev ninja-build aapt python2.7 vim openjdk-17-jdk \
+                tzdata net-tools bc locales p7zip-full s-nail acl jq git-review ccache \
+                sudo
+            if [[ -f /usr/bin/python2.7 ]]; then
+                ln -sf /usr/bin/python2.7 /usr/bin/python && ln -sf /usr/bin/python2.7 /usr/bin/python2
+            fi
+            sudo wget -O /usr/local/bin/repo http://10.31.1.205:6157/liuxinsong/5f03e1973d3243aaa3dc8ab9b4762d3c/raw/HEAD/repo2.42.py
+            sudo chmod a+x /usr/local/bin/repo
+            ;;
+    esac
+    sudo apt-get clean && rm -rf /var/lib/apt/lists/*
+    sudo locale-gen en_US.UTF-8
+}
 function install_common_soft() {
-    sudo apt update && sudo apt upgrade -y
+    sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
     sudo apt install -y git git-review tree unzip build-essential curl wget aria2 python3-pip fakeroot manpages-zh debhelper htop
     sudo apt install -y devscripts pbuilder cmake neofetch jq screen universal-ctags
     if [ -n "$DISPLAY" ]; then
@@ -582,6 +845,38 @@ EOF
     sudo systemctl restart autofs.service
 
     ls "/${MOUNTDIR}/mirror"
+}
+install_jenkins() {
+    green "添加Jenkins源"
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc
+    cat << EOF | sudo tee /etc/apt/sources.list.d/jenkins.list
+deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+EOF
+    green "安装Jenkins"
+    sudo apt update
+    sudo apt install jenkins -y
+    green "修改Jenkins启动用户为当前用户$USER"
+    sudo sed -i "s/User=.*/User=$USER/g" /lib/systemd/system/jenkins.service
+    sudo sed -i "s/Group=.*/Group=$USER/g" /lib/systemd/system/jenkins.service
+    sudo systemctl daemon-reload
+    green "修改jenkins目录/var/lib/jenkins /var/cache/jenkins 权限"
+    sudo chown -R "$USER":"$USER" /var/lib/jenkins
+    sudo chown -R "$USER":"$USER" /var/cache/jenkins
+    green "替换插件升级服务器"
+    sed -i 's/http:\/\/updates.jenkins-ci.org\/download/https:\/\/mirrors.tuna.tsinghua.edu.cn\/jenkins/g' /var/lib/jenkins/updates/default.json && sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' /var/lib/jenkins/updates/default.json
+    sed -i 's/<url.*url>/<url>https:\/\/mirrors.tuna.tsinghua.edu.cn\/jenkins\/updates\/update-center.json<\/url>/g' /var/lib/jenkins/hudson.model.UpdateCenter.xml
+
+    sudo systemctl enable jenkins --now
+    green "访问jenkins"
+    green "http://127.0.0.1:8080"
+    green "获取Jenkins初始密码"
+    cat /var/lib/jenkins/secrets/initialAdminPassword
+
+}
+enable_user_sudo_nopasswd() {
+    green "设置${USER}免密sudo"
+    sudo mkdir -p /etc/sudoers.d
+    echo "${USER} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/"$USER"
 }
 setup_build_node() {
     sudo apt -y install openjdk-17-jre
