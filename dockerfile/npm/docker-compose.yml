@@ -1,0 +1,9 @@
+version: '3'
+services:
+  app:
+    image: 'chishin/nginx-proxy-manager-zh:release'
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
