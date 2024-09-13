@@ -76,7 +76,7 @@ commands=(
      ["更新脚本"]="update_scripts"
 )
 update_scripts() {
-    wget -O pi.sh https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/zero3/pi.sh && chmod +x pi.sh
+    wget -O pi.sh http://10.8.250.192:6157/liuxinsong/25f3cc27df5341699d9ce42a15c9390e/raw/HEAD/ubuntu-first-setup.sh && chmod +x pi.sh
     echo "脚本已更新并保存在当前目录 pi.sh,现在将执行新脚本。"
     ./pi.sh
     exit 0
@@ -88,7 +88,7 @@ UBUNTU_MIRRORS=(
     "http://mirrors.aliyun.com/ubuntu/"
     "http://mirrors.ustc.edu.cn/ubuntu/"
     "http://mirrors.tuna.tsinghua.edu.cn/ubuntu/"
-    "http://10.31.1.208/ubuntu/"
+    "http://10.8.250.204/ubuntu/"
 )
 DEBIAN_MIRRORS=(
     "http://deb.debian.org/debian/"
@@ -400,13 +400,14 @@ config_docker() {
     cat << EOF | sudo tee /etc/docker/daemon.json
 {
   "registry-mirrors": [
+    "https://docker.pinolly.top",
     "http://f1361db2.m.daocloud.io",
     "https://registry.docker-cn.com",
     "http://hub-mirror.c.163.com",
-    "http://10.31.1.205:5000",
-    "http://10.31.1.205:5001"
+    "http://10.8.250.192:5000",
+    "http://10.8.250.192:5001"
   ],
-  "insecure-registries": [ "10.31.1.205:5000", "10.31.1.205:5001" ],
+  "insecure-registries": [ "10.8.250.192:5000", "10.8.250.192:5001" ],
   "log-driver":"json-file",
   "log-opts":{ "max-size" :"100m","max-file":"1"}
 }
@@ -447,13 +448,14 @@ EOF
     cat << EOF | sudo tee /etc/docker/daemon.json
 {
   "registry-mirrors": [
+    "https://docker.pinolly.top",
     "http://f1361db2.m.daocloud.io",
     "https://registry.docker-cn.com",
     "http://hub-mirror.c.163.com"
-    "http://10.31.1.205:5000",
-    "http://10.31.1.205:5001"
+    "http://10.8.250.192:5000",
+    "http://10.8.250.192:5001"
   ],
-  "insecure-registries": [ "10.31.1.205:5000", "10.31.1.205:5001" ],
+  "insecure-registries": [ "10.8.250.192:5000", "10.8.250.192:5001" ],
   "live-restore": true
 }
 EOF
@@ -464,7 +466,7 @@ EOF
     green "使用${username}拉取docker镜像"
     sudo -u "$username" bash << EOF
 mkdir \$HOME/.cache
-docker pull 10.31.1.205:5000/builder18.04-ccache:latest
+docker pull 10.8.250.192:5000/builder18.04-ccache:latest
 EOF
     green "请使用${username}登录系统并使用下面的命令启动容器进行构建"
     green "起总/data是你的代码所在目录，可以自行修改冒号前的/data"
@@ -480,7 +482,7 @@ docker run --privileged \
            --volume=/mnt:/mnt \
            --volume=$HOME/.ssh:/home/talos/.ssh \
            --memory=32G --cpus=16 -it --rm \
-           10.31.1.205:5000/builder18.04-ccache:latest
+           10.8.250.192:5000/builder18.04-ccache:latest
 EOF
 }
 function get_latest_release() {
@@ -540,7 +542,7 @@ install_android_build() {
             if [[ -f /usr/bin/python2.7 ]]; then
                 ln -sf /usr/bin/python2.7 /usr/bin/python && ln -sf /usr/bin/python2.7 /usr/bin/python2
             fi
-            sudo wget -O /usr/local/bin/repo http://10.31.1.205:6157/liuxinsong/5f03e1973d3243aaa3dc8ab9b4762d3c/raw/HEAD/repo2.42.py
+            sudo wget -O /usr/local/bin/repo http://10.8.250.192:6157/liuxinsong/5f03e1973d3243aaa3dc8ab9b4762d3c/raw/HEAD/repo2.42.py
             sudo chmod a+x /usr/local/bin/repo
             ;;
     esac
@@ -836,10 +838,10 @@ EOF
     sudo chown "$USER:$USER" "/${MOUNTDIR}/mirror"
 
     cat << EOF | sudo tee /etc/auto.samba
-/${MOUNTDIR}/mirror -fstype=cifs,ro,credentials=/etc/samba_credentials,uid=$userid,iocharset=utf8 ://10.14.129.90/mirror
+/${MOUNTDIR}/mirror -fstype=cifs,ro,credentials=/etc/samba_credentials,uid=$userid,iocharset=utf8 ://10.8.250.199/mirror
 EOF
     #手动挂载一次
-    sudo mount -t cifs //10.14.129.90/mirror "/${MOUNTDIR}/mirror" -o credentials=/etc/samba_credentials,uid="$userid"
+    sudo mount -t cifs //10.8.250.199/mirror "/${MOUNTDIR}/mirror" -o credentials=/etc/samba_credentials,uid="$userid"
     sudo umount "/${MOUNTDIR}/mirror"
     #自动挂载服务启动
     sudo systemctl restart autofs.service
